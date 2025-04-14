@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Image Upscaler</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 2rem; }
+    h1 { text-align: center; }
+    #preview { max-width: 100%; margin: 1rem 0; border: 1px solid #ccc; }
+    .log { font-size: 0.9rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>AI Image Upscaler</h1>
+  <p>Select an image to upscale:</p>
+  <input type="file" id="imageInput" accept="image/*" />
+  <button id="uploadBtn">Upscale Image</button>
+  <div class="log" id="log"></div>
+  <img id="preview" src="" hidden/>
+  <script>
+    const uploadBtn = document.getElementById('uploadBtn');
+    const input = document.getElementById('imageInput');
+    const log = document.getElementById('log');
+    const preview = document.getElementById('preview');
+
+    uploadBtn.onclick = async () => {
+      const file = input.files[0];
+      if (!file) {
+        log.innerText = '⚠️ Please select an image first.';
+        return;
+      }
+
+      log.innerText = 'Uploading and upscaling image... ⏳';
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("https://web-production-92ba1.up.railway.app/upscale", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) throw new Error("Upscale API failed");
+
+        const blob = await response.blob();
+        const objectURL = URL.createObjectURL(blob);
+        preview.src = objectURL;
+        preview.hidden = false;
+        log.innerText = '✅ Image upscaled successfully!';
+      } catch (err) {
+        console.error(err);
+        log.innerText = '❌ Failed to upscale image. See console.';
+      }
+    };
+  </script>
+</body>
+</html>
